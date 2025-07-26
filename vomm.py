@@ -56,8 +56,8 @@ def find_contexts(training_data, d= 4):
 
 def count_occurrences(training_data, d=4, alphabet_size = None):
     """
-    Counts the number of occurrences of s\sigma where s is a context
-    and \sigma is the symbol that immediately follows s in the
+    Counts the number of occurrences of s sigma where s is a context
+    and sigma is the symbol that immediately follows s in the
     training data.
 
     training_data represents the sequence of observed symbols as a
@@ -79,7 +79,7 @@ def count_occurrences(training_data, d=4, alphabet_size = None):
     if alphabet_size == None:
         alphabet_size = max(training_data) + 1
 
-    counts = dict([(x, np.zeros(alphabet_size,dtype=np.int)) for x in contexts])
+    counts = dict([(x, np.zeros(alphabet_size,dtype=int)) for x in contexts])
 
     # Include the null context as well.
     counts[()] = np.bincount(training_data,minlength = alphabet_size)
@@ -271,11 +271,11 @@ class ppm:
         """
 
         if prefix != None:
-            new_data = np.zeros(len(prefix) + length,dtype=np.int)
+            new_data = np.zeros(len(prefix) + length,dtype=int)
             new_data[:len(prefix)] = prefix
             start = len(prefix)
         else:
-            new_data = np.zeros(length,dtype=np.int)
+            new_data = np.zeros(length,dtype=int)
             start = 0
 
         for t in range(start,len(new_data)):
@@ -536,16 +536,16 @@ class pst_JS(ppm):
 
 
 def construct_counts_dictionary(observed_sequence,d=4):
-    """Constructs the dictionary of observed counts of words following 
-    contexts at most d words long. 
-    
+    """Constructs the dictionary of observed counts of words following
+    contexts at most d words long.
+
     observed_sequence should be a sequence of type integer of non-negative integers.
     Each integer corresponds to some word in the vocabulary.
     """
-    
+
     counts = defaultdict(Counter)
     N = len(observed_sequence)
-    
+
     for t in range(N):
         obs = observed_sequence[t]
         for l in range(0,d+1):
@@ -553,55 +553,55 @@ def construct_counts_dictionary(observed_sequence,d=4):
                 break
             context = observed_sequence[t-l:t]
             counts[context][obs] +=1
-    
+
     return counts
-            
+
 def construct_prob_dictionary(counts_dictionary,vocabulary_size):
     """Computes the memory efficient dictionary word| context probabilities"""
 
     V = vocabulary_size
-    
+
     probs_dictionary = dict()
     for context in counts_dictionary:
         local_list = counts_dictionary[context]
         total_count = sum(list(local_list.values()))
-        
+
         R = len(local_list)
         if R == V:
             omega = 1.0
         else:
             omega = (1+ total_count)/(2 + total_count)
-            
+
         probs_dictionary[context] = defaultdict(float)
-        
+
         local_probs = defaultdict(float)
         for word in local_list:
             c_i = local_list[word]
             pr = c_i/total_count * omega
             local_probs[word] = pr
-        
+
         if R < V:
             local_probs[None] = (1.0 - omega)/(V-R)
         else:
             local_probs[None] = 0.0
-        
+
         probs_dictionary[context] = local_probs
-    
+
     return probs_dictionary
 
 def generate_log_pdf_dict(probs_dictionary):
     """Computes the log likelihood dictionary
     log (Pr(symbol|context)) from the probs_dictionary"""
-    
+
     log_pdf_dict = {}
     for context in probs_dictionary:
         local_pdf_list = probs_dictionary[context]
         local_log_pdf_list = {}
         for asymbol in local_pdf_list:
             local_log_pdf_list[asymbol] = np.log(local_pdf_list[asymbol])
-            
+
         log_pdf_dict[context] = local_log_pdf_list
-    
+
     return log_pdf_dict
 
 class PPM_words:
@@ -609,7 +609,7 @@ class PPM_words:
     size of the vocabulary is large (>= 2**15 for example).
 
     """
-    
+
     def __init__(self):
         """ Not much to do here. """
 
@@ -702,11 +702,11 @@ class PPM_words:
             use_me = tqdm
 
         if prefix != None:
-            new_data = np.zeros(len(prefix) + length,dtype=np.int)
+            new_data = np.zeros(len(prefix) + length,dtype=int)
             new_data[:len(prefix)] = prefix
             start = len(prefix)
         else:
-            new_data = np.zeros(length,dtype=np.int)
+            new_data = np.zeros(length,dtype=int)
             start = 0
 
         scratch_pdf = np.zeros(self.alphabet_size)
